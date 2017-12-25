@@ -1,5 +1,6 @@
 package com.hc.oywt;
 
+import com.hc.oywt.model.TimeMessage;
 import com.hc.oywt.utils.HttpClientSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +17,9 @@ public class GetThred implements Runnable {
     private HttpGet httpGet;
 
     private BlockingQueue<String> queue;
+
+    private final String EXIT = "EXIT";
+
     public GetThred(CloseableHttpClient client, HttpGet httpGet, BlockingQueue queue) {
         this.client = client;
         this.httpGet = httpGet;
@@ -28,15 +32,22 @@ public class GetThred implements Runnable {
         CloseableHttpResponse response = null;
 
         try {
-             response = client.execute(httpGet);
+            for (int i = 0; i < 100; i++) {
+                response = client.execute(httpGet);
 
-            InputStream inputStream = response.getEntity().getContent();
+                InputStream inputStream = response.getEntity().getContent();
 
-            String s = HttpClientSupport.get(inputStream);
+                String s = HttpClientSupport.get(inputStream);
 
-            queue.put(s);
+                queue.put(s);
 
-            System.out.println("生产值是"+s+"====生产者线程id"+Thread.currentThread().getId());
+                System.out.println("生产值是"+s+"====生产者线程id"+Thread.currentThread().getId());
+
+            }
+
+            //此次任务结束，放入退出标识
+            queue.put(EXIT);
+
         } catch (IOException e) {
                 e.printStackTrace();
         } catch (InterruptedException e) {
@@ -51,4 +62,6 @@ public class GetThred implements Runnable {
             }
         }
     }
+
+
 }

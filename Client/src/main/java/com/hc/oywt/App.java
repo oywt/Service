@@ -25,18 +25,22 @@ public class App
 
         HttpGet httpGet = new HttpGet("http://localhost:8080/Service/homepage/getJson.json");
 
+      //  HttpClientSupport.getHttpGet(String.valueOf(1189));
+
         BlockingQueue<String> queue = new LinkedBlockingQueue<String>();//队列长度应根据业务来定
 
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 10; i++) {
             executorService.execute((new GetThred(httpClient, httpGet, queue)));
 
         }
 
-        for (int i = 0; i < 6; i++) {
-            executorService.execute(new ConsumerGetThred(queue));
-
+        for (int i = 0; i < 10; i++) {
+            executorService.execute(new ConsumerGetThred(httpClient,queue));
         }
+
+
+        executorService.shutdown();
 
     }
 
